@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NeuroTrade – AI Stock Terminal</title>
+<style>
+:root{--bg:#070b14;--p:#0e1524;--p2:#141d31;--bd:#1f2a44;--tx:#e6ecff;--mu:#7f8db3;--up:#19d38a;--dn:#ff4d6a;--ac:#6c8cff;--ac2:#b36cff;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#eef2fb;--p:#fff;--p2:#f3f6fd;--bd:#d9e0f2;--tx:#101830;--mu:#5d6b8f;--up:#0a9d63;--dn:#d6334f;color-scheme:light}}
+:root[data-theme="light"]{--bg:#eef2fb;--p:#fff;--p2:#f3f6fd;--bd:#d9e0f2;--tx:#101830;--mu:#5d6b8f;--up:#0a9d63;--dn:#d6334f;color-scheme:light}
+*{box-sizing:border-box}html,body{margin:0}body{background:radial-gradient(900px 400px at 80% -10%,#6c8cff22,transparent),var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--bd);position:sticky;top:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);z-index:5}
+.logo{font-weight:800;letter-spacing:.5px;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:18px}
+.idx{display:flex;gap:16px;overflow-x:auto;flex:1;font-size:12px;color:var(--mu)}.idx b{color:var(--tx);font-weight:600;margin-right:4px}
+.live{color:var(--up);font-size:11px}.live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--up);margin-right:5px;animation:pl 1.4s infinite}
+@keyframes pl{50%{opacity:.25}}
+main{display:grid;grid-template-columns:250px minmax(0,1fr) 360px;gap:12px;padding:12px;max-width:1700px;margin:auto}
+@media(max-width:1100px){main{grid-template-columns:1fr}}
+.card{background:var(--p);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.ttl{padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.wl{display:flex;flex-direction:column;max-height:70vh;overflow:auto}
+.row{display:flex;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--bd);border-left:3px solid transparent;transition:.15s}
+.row:hover{background:var(--p2)}.row.on{background:var(--p2);border-left-color:var(--ac)}
+.row small{color:var(--mu);display:block;font-size:11px}.r{text-align:right}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.hd{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:baseline;padding:14px 16px 4px}
+.hd h2{margin:0;font-size:20px}.px{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:18px;flex-wrap:wrap;padding:4px 16px 8px;color:var(--mu);font-size:12px}.stats b{color:var(--tx);font-weight:600}
+.tf{display:flex;gap:6px;padding:0 16px 8px}.tf button,.btn{background:var(--p2);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:5px 11px;cursor:pointer;font:inherit;font-size:12px}
+.tf button.on{border-color:var(--ac);color:var(--ac)}
+.chartw{position:relative;height:420px;padding:0 8px 8px}canvas{width:100%;height:100%;display:block}
+.scan{position:absolute;top:0;bottom:8px;width:90px;left:-100px;background:linear-gradient(90deg,transparent,#6c8cff55,transparent);pointer-events:none;opacity:0}
+.scan.on2{opacity:1;animation:sc 1.6s linear infinite}@keyframes sc{to{left:100%}}
+.ai{padding:14px;display:flex;flex-direction:column;gap:12px}
+.go{background:linear-gradient(90deg,var(--ac),var(--ac2));border:0;color:#fff;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;font-size:14px;width:100%}
+.go:disabled{opacity:.6;cursor:wait}
+.bias{display:flex;align-items:center;gap:12px}.badge{padding:4px 12px;border-radius:99px;font-weight:700;font-size:13px}
+.bar{height:6px;background:var(--p2);border-radius:9px;flex:1;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));width:0;transition:width .8s}
+.blk{border:1px solid var(--bd);border-radius:10px;padding:10px 12px;background:var(--p2)}.blk h4{margin:0 0 6px;font-size:12px;letter-spacing:.5px}
+.blk ul{margin:0;padding-left:18px}.blk li{margin:3px 0}
+.news{padding:10px 14px;border-bottom:1px solid var(--bd)}.news:last-child{border:0}.tag{font-size:10px;padding:1px 7px;border-radius:99px;margin-left:6px;font-weight:700}
+.t-up{background:#19d38a22;color:var(--up)}.t-dn{background:#ff4d6a22;color:var(--dn)}.t-n{background:#7f8db322;color:var(--mu)}
+.mu{color:var(--mu);font-size:12px}.disc{padding:8px 16px 14px;color:var(--mu);font-size:11px}
+.tabs{display:flex}.tabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;color:var(--mu);padding:10px;cursor:pointer;font:inherit}.tabs button.on{color:var(--tx);border-color:var(--ac)}
+body:before{content:"";position:fixed;inset:-20%;z-index:-1;background:radial-gradient(40% 40% at 20% 25%,#6c8cff40,transparent 70%),radial-gradient(35% 35% at 80% 20%,#b36cff35,transparent 70%),radial-gradient(40% 40% at 60% 85%,#19d38a22,transparent 70%);filter:blur(30px);animation:aur 18s ease-in-out infinite alternate}
+@keyframes aur{to{transform:translate3d(4%,3%,0) scale(1.12) rotate(6deg)}}
+body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:56px 56px;opacity:.18;mask-image:radial-gradient(ellipse at 50% 0,#000,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 0,#000,transparent 75%)}
+.card{background:linear-gradient(160deg,color-mix(in srgb,var(--p) 82%,transparent),color-mix(in srgb,var(--p2) 70%,transparent));backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border:1px solid transparent;background-clip:padding-box;position:relative;box-shadow:0 10px 40px -18px #000a;animation:fu .6s both}
+.card:before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(140deg,#6c8cff88,transparent 35%,transparent 65%,#b36cff88);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+main>.card:nth-child(2){animation-delay:.1s}main>.card:nth-child(3){animation-delay:.2s}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}}
+.row{gap:8px;align-items:center}.row:hover{transform:translateX(3px);background:linear-gradient(90deg,#6c8cff22,transparent)}.row.on{box-shadow:inset 0 0 24px #6c8cff1f}
+.sp{width:64px;height:24px;flex:none;margin-left:auto}.row>div:first-child{min-width:0}
+.px{text-shadow:0 0 24px #6c8cff66}
+.btn,.tf button{transition:.2s}.btn:hover,.tf button:hover{border-color:var(--ac);box-shadow:0 0 14px #6c8cff55;transform:translateY(-1px)}
+.go{position:relative;overflow:hidden;box-shadow:0 8px 28px -8px #6c8cffaa;transition:.2s;background-size:200% 100%;animation:gs 4s linear infinite}
+@keyframes gs{50%{background-position:100% 0}}.go:hover{transform:translateY(-2px);box-shadow:0 12px 34px -6px #b36cffcc}
+.blk{animation:fu .5s both;transition:.2s}.blk:hover{border-color:var(--ac);transform:translateY(-2px)}.blk:nth-of-type(2){animation-delay:.15s}
+.badge{box-shadow:0 0 18px currentColor;animation:pl 2.4s infinite}
+.news{animation:fu .5s both;transition:.2s}.news:hover{background:var(--p2)}
+.tape{overflow:hidden;border-bottom:1px solid var(--bd);white-space:nowrap;font-size:12px;background:color-mix(in srgb,var(--p) 60%,transparent)}
+#tp{display:inline-block;padding:7px 0;animation:mq 45s linear infinite}#tp:hover{animation-play-state:paused}#tp span{margin:0 22px;color:var(--mu)}#tp b{color:var(--tx);margin-right:6px}
+@keyframes mq{to{transform:translateX(-50%)}}
+.mod{position:fixed;inset:0;background:#000a;backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}.mod.on{display:flex}
+.mbox{width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--p);border:1px solid var(--bd);border-radius:16px;box-shadow:0 30px 80px -20px #6c8cff66;animation:fu .3s both}
+.mb{padding:14px 16px;display:flex;flex-direction:column;gap:12px}.mb pre{margin:0;padding:12px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--up)}
+.seg{display:flex;gap:6px}.seg .btn.on{border-color:var(--ac);color:var(--ac);box-shadow:0 0 14px #6c8cff44}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:9px}
+.dsc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 12px 28px;max-width:1700px;margin:auto}.wide{grid-column:1/-1}@media(max-width:1100px){.dsc{grid-template-columns:1fr}}
+.fg{text-align:center;padding:14px}.fg svg{width:230px;max-width:100%}.fgn{font-size:40px;font-weight:800;margin-top:-34px;text-shadow:0 0 24px #6c8cff88}
+.hm{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:12px}.tile{border-radius:10px;padding:8px;cursor:pointer;display:flex;flex-direction:column;min-height:74px;transition:.2s;border:1px solid #fff1}.tile:hover{transform:scale(1.06);box-shadow:0 0 18px #6c8cff66;z-index:1}.tile b{font-size:12px}.tile small{font-size:10px;opacity:.75}.tile span{margin-top:auto;font-weight:700;font-size:12px}
+.mvl{padding:6px 14px 12px}.mvr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--bd)}.mvr:last-child{border:0}
+.mood{padding:10px 16px}.ng{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;padding:4px 16px 16px}
+.nc{background:var(--p2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer;transition:.25s;animation:fu .5s both}.nc:hover{transform:translateY(-5px);box-shadow:0 18px 40px -14px #6c8cffaa;border-color:var(--ac)}
+.im{position:relative;overflow:hidden}.im svg{display:block;width:100%;height:130px;transition:.5s}.nc:hover .im svg{transform:scale(1.08)}.im .tag{position:absolute;top:8px;right:8px;margin:0;backdrop-filter:blur(6px);background:#000a;color:#fff}.im.big svg{height:170px;border-radius:12px}
+.nb{padding:12px}.nb h3{margin:4px 0 6px;font-size:15px;line-height:1.35}.nb p{margin:0 0 8px}.rd{color:var(--ac);font-size:12px;font-weight:700}
+.sk{height:250px;background:linear-gradient(90deg,var(--p2),var(--bd),var(--p2));background-size:200% 100%;animation:shm 1.2s linear infinite}@keyframes shm{to{background-position:-200% 0}}
+.dnav{flex-wrap:wrap;align-items:center}#dsel{background:var(--p2);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:5px 8px;font:inherit;font-size:12px;max-width:190px}
+label.mu{display:block}.fi{display:block;width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+@media(prefers-reduced-motion:reduce){*,:before,:after{animation:none!important;transition:none!important}}
+</style></head><body>
+<header><span class="logo">◆ NEUROTRADE</span><div class="idx" id="idx"></div><span class="live">SIMULATED LIVE</span><span class="live" id="pl"></span><span class="mu" id="sk"></span><button class="btn" id="cfg">⚙ AI API</button><button class="btn" id="th">◐</button></header>
+<div class="tape"><div id="tp"></div></div>
+<main>
+<section class="card"><div class="ttl">Watchlist · NSE</div><div class="wl" id="wl"></div></section>
+<section class="card">
+ <div class="hd"><h2 id="nm"></h2><span class="px" id="px"></span><span id="ch"></span></div>
+ <div class="stats" id="st"></div>
+ <div class="tf" id="tf"></div>
+ <div class="tf dnav" id="dn" style="display:none"></div>
+ <div class="chartw"><canvas id="cv"></canvas><div class="scan" id="scan"></div></div>
+ <div class="disc">Demo data is simulated (no live market feed). AI commentary is educational, not investment advice; no one can reliably predict prices.</div>
+</section>
+<section class="card"><div class="tabs" id="tabs"><button class="on" data-t="a">AI Analysis</button><button data-t="n">Daily News</button></div>
+ <div class="ai" id="pane"></div></section>
+</main>
+<section class="dsc">
+<div class="card"><div class="ttl">Market mood · Fear &amp; Greed</div><div id="fg" class="fg"></div></div>
+<div class="card"><div class="ttl">Sector heatmap · tap a tile</div><div class="hm" id="hm"></div></div>
+<div class="card"><div class="ttl">Top movers</div><div id="mv" class="mvl"></div></div>
+<div class="card wide"><div class="ttl">Daily news &amp; articles · every company<button class="btn" id="gn">✦ Generate today’s briefing</button></div><div class="mood mu" id="mood">Tap generate for AI-written articles on all 10 companies.</div><div class="tf" id="nf"><button class="on" data-f="all">All</button><button data-f="positive">Positive</button><button data-f="negative">Negative</button><button data-f="neutral">Neutral</button></div><div class="ng" id="ng"></div></div>
+</section>
+<div class="mod" id="mod"><div class="mbox"><div class="ttl">AI integration<button class="btn" id="mx">✕</button></div><div class="mb" id="mb"></div></div></div>
+<script>
+const S=[["RELIANCE","Reliance Industries",2890],["TCS","Tata Consultancy Services",4120],["INFY","Infosys",1840],["HDFCBANK","HDFC Bank",1710],["ICICIBANK","ICICI Bank",1260],["SBIN","State Bank of India",830],["TATAMOTORS","Tata Motors",960],["ITC","ITC Ltd",470],["ZOMATO","Zomato",245],["BHARTIARTL","Bharti Airtel",1610]];
+const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+function rng(s){return()=>(s=(s*1664525+1013904223)%4294967296)/4294967296}
+const D={};S.forEach(([t,n,p],i)=>{const r=rng(i*977+13);let c=p*(.85+r()*.1),a=[];const dr=(r()-.45)*.002;for(let d=0;d<260;d++){const o=c;c=Math.max(5,c*(1+dr+(r()-.5)*.03));a.push({o,c,h:Math.max(o,c)*(1+r()*.012),l:Math.min(o,c)*(1-r()*.012),v:Math.round(1e6*(1+r()*3))})}D[t]=a});
+let cur="RELIANCE",rg=90,lv=null,AI={},TIER="default",ID=-1;const MODELS={quick:"claude-haiku-5-5",default:"claude-sonnet-5-5",complex:"claude-opus-5-5"};
+const sma=(a,n)=>a.map((_,i)=>i<n-1?null:a.slice(i-n+1,i+1).reduce((s,x)=>s+x.c,0)/n);
+function rsi(a,n=14){let g=0,l=0;for(let i=a.length-n;i<a.length;i++){const d=a[i].c-a[i-1].c;d>0?g+=d:l-=d}return l===0?100:100-100/(1+g/l)}
+function pct(a){const x=a[a.length-1].c,y=a[a.length-2].c;return[x,x-y,(x/y-1)*100]}
+function spark(t){const a=D[t].slice(-30).map(k=>k.c),mn=Math.min(...a),mx=Math.max(...a),u=a[29]>=a[0],c=u?"var(--up)":"var(--dn)",p=a.map((v,i)=>(i*64/29).toFixed(1)+","+(22-(v-mn)/(mx-mn||1)*20).toFixed(1)).join(" ");return`<svg class="sp" viewBox="0 0 64 24"><polyline points="${p}" fill="none" stroke="${c}" stroke-width="1.6" stroke-linejoin="round"/></svg>`}
+function tape(){const h=S.map(([t])=>{const q=pct(D[t])[2];return`<span><b>${t}</b>${fmt(pct(D[t])[0])} <span class="${q>=0?"up":"dn"}" style="margin:0">${q>=0?"▲":"▼"} ${Math.abs(q).toFixed(2)}%</span></span>`}).join("");$("tp").innerHTML=h+h}
+function renderWL(){tape();$("wl").innerHTML=S.map(([t,n])=>{const[p,d,q]=pct(D[t]);return`<div class="row ${t==cur?"on":""}" data-t="${t}"><div>${t}<small>${n}</small></div>${spark(t)}<div class="r">${fmt(p)}<small class="${q>=0?"up":"dn"}">${q>=0?"▲":"▼"} ${Math.abs(q).toFixed(2)}%</small></div></div>`}).join("");
+ const nf=D.RELIANCE,m=[["NIFTY 50",22450],["SENSEX",73900],["BANKNIFTY",48200]];$("idx").innerHTML=m.map(([n,v],i)=>{const q=pct(D[S[i*2][0]])[2];return`<span><b>${n}</b>${fmt(v*(1+q/100))} <span class="${q>=0?"up":"dn"}">${q.toFixed(2)}%</span></span>`}).join("")}
+function head(){const s=S.find(x=>x[0]==cur),a=D[cur],[p,d,q]=pct(a),r=ID>=0?[a[ID]]:a.slice(-rg),hi=Math.max(...r.map(x=>x.h)),lo=Math.min(...r.map(x=>x.l));
+ $("nm").textContent=cur+" · "+s[1];$("px").textContent="₹"+fmt(p);$("ch").innerHTML=`<span class="${d>=0?"up":"dn"}">${d>=0?"▲":"▼"} ${fmt(Math.abs(d))} (${q.toFixed(2)}%)</span>`;
+ $("st").innerHTML=`<span>RSI(14) <b>${rsi(a).toFixed(0)}</b></span><span>Range high <b>${fmt(hi)}</b></span><span>Range low <b>${fmt(lo)}</b></span><span>Volume <b>${(a[a.length-1].v/1e6).toFixed(2)}M</b></span>`}
+function draw(){const cv=$("cv"),dpr=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;const x=cv.getContext("2d");x.scale(dpr,dpr);
+ const cs=getComputedStyle(document.documentElement),up=cs.getPropertyValue("--up"),dn=cs.getPropertyValue("--dn"),bd=cs.getPropertyValue("--bd"),mu=cs.getPropertyValue("--mu"),ac=cs.getPropertyValue("--ac");
+ const all=D[cur],a=ID>=0?intra(cur,ID):all.slice(-rg),m20=ID>=0?[]:sma(all,20).slice(-rg),m50=ID>=0?[]:sma(all,50).slice(-rg),pw=56,vh=60,ch=h-vh-20;
+ let hi=Math.max(...a.map(k=>k.h)),lo=Math.min(...a.map(k=>k.l));if(lv&&ID<0){hi=Math.max(hi,lv.resistance);lo=Math.min(lo,lv.support)}const pd=(hi-lo)*.06;hi+=pd;lo-=pd;
+ const Y=v=>10+(hi-v)/(hi-lo)*ch,cw=(w-pw)/a.length,X=i=>i*cw+cw/2;x.font="11px system-ui";x.textAlign="left";
+ for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5,y=Y(v);x.strokeStyle=bd;x.beginPath();x.moveTo(0,y);x.lineTo(w-pw,y);x.stroke();x.fillStyle=mu;x.fillText(v.toFixed(0),w-pw+6,y+4)}
+ const mv=Math.max(...a.map(k=>k.v));a.forEach((k,i)=>{const u=k.c>=k.o;x.fillStyle=u?up:dn;x.globalAlpha=.3;x.fillRect(X(i)-cw*.35,h-10-k.v/mv*vh,cw*.7,k.v/mv*vh);x.globalAlpha=1;x.strokeStyle=x.fillStyle;x.beginPath();x.moveTo(X(i),Y(k.h));x.lineTo(X(i),Y(k.l));x.stroke();const t=Y(Math.max(k.o,k.c));x.fillRect(X(i)-Math.max(cw*.35,.6),t,Math.max(cw*.7,1.2),Math.max(Math.abs(Y(k.o)-Y(k.c)),1))});
+ [[m20,"#f5b942"],[m50,ac]].forEach(([m,c])=>{x.strokeStyle=c;x.lineWidth=1.5;x.beginPath();let s=0;m.forEach((v,i)=>{if(v==null)return;s?x.lineTo(X(i),Y(v)):x.moveTo(X(i),Y(v));s=1});x.stroke();x.lineWidth=1});
+ if(lv&&ID<0)[[lv.resistance,dn,"AI resistance"],[lv.support,up,"AI support"]].forEach(([v,c,t])=>{const y=Y(v);x.strokeStyle=c;x.setLineDash([6,5]);x.beginPath();x.moveTo(0,y);x.lineTo(w-pw,y);x.stroke();x.setLineDash([]);x.fillStyle=c;x.fillText(t+" "+v.toFixed(0),8,y-5)});
+ if(ID>=0){x.fillStyle=mu;x.textAlign="center";for(let i=0;i<a.length;i+=15){const m=555+i*5;x.fillText(Math.floor(m/60)+":"+String(m%60).padStart(2,"0"),X(i),h-1)}x.textAlign="left";x.fillText(dl(ID)+" · 5-min candles (simulated)",8,14)}else{x.fillStyle="#f5b942";x.fillText("— SMA20",8,14);x.fillStyle=ac;x.fillText("— SMA50",70,14)}}
+function tabs(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));pane(t)}
+let tab="a";
+function pane(){const r=AI[cur],p=$("pane");
+ if(!r){p.innerHTML=`<div class="mu">Ask the AI to read the ${cur} chart: trend, momentum, key levels, why it could rise or fall, and a daily news briefing.</div><button class="go" id="run">✦ Analyze ${cur} with AI</button><div id="err" class="mu"></div>`;$("run").onclick=run;return}
+ if(tab=="a"){const c=r.bias=="Bullish"?"t-up":r.bias=="Bearish"?"t-dn":"t-n";
+  p.innerHTML=`<div class="bias"><span class="badge ${c}">${r.bias}</span><div class="bar"><i id="cf"></i></div><span class="mu">${r.confidence}% conf.</span></div><div>${r.summary}</div>
+  <div class="blk"><h4 class="up">▲ WHY IT COULD GO UP</h4><ul>${r.why_up.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+  <div class="blk"><h4 class="dn">▼ WHY IT COULD GO DOWN</h4><ul>${r.why_down.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+  <button class="btn" id="run">↻ Re-analyze</button>`;setTimeout(()=>{const f=$("cf");if(f)f.style.width=r.confidence+"%"},50);$("run").onclick=run}
+ else p.innerHTML=`<div class="mu">AI-written briefing for today (model knowledge, not a live news wire; verify on NSE/BSE and company filings).</div>`+r.news.map(n=>`<div class="news"><b>${n.headline}</b><span class="tag ${n.impact=="positive"?"t-up":n.impact=="negative"?"t-dn":"t-n"}">${n.impact}</span><div class="mu">${n.detail}</div></div>`).join("")}
+async function run(){const b=$("run"),a=D[cur],all=a,e=$("err");b.disabled=true;b.textContent="Reading chart…";$("scan").classList.add("on2");
+ try{const c=a.slice(-30).map(k=>+k.c.toFixed(1)),m20=sma(all,20).pop(),m50=sma(all,50).pop(),hi=Math.max(...a.slice(-60).map(k=>k.h)),lo=Math.min(...a.slice(-60).map(k=>k.l));
+  const s=S.find(x=>x[0]==cur);
+  const q=`You are a markets analyst. Company: ${s[1]} (NSE: ${cur}). The price series below is SIMULATED demo data; treat it as a chart pattern exercise. Last 30 daily closes (INR): ${c.join(",")}. SMA20=${m20.toFixed(1)}, SMA50=${m50.toFixed(1)}, RSI14=${rsi(a).toFixed(0)}, 60-day high=${hi.toFixed(0)}, low=${lo.toFixed(0)}. Reply ONLY with JSON: {"bias":"Bullish|Bearish|Neutral","confidence":number 30-85,"summary":"2 sentences on what the chart shows","why_up":[3 short reasons mixing chart signals and real fundamentals/sector themes],"why_down":[3 short reasons],"levels":{"support":number,"resistance":number},"news":[4 items {"headline","impact":"positive|negative|neutral","detail":"one sentence"} about typical current drivers for this company and its sector, clearly general, no invented specific figures]}`;
+  const j=await ai(q);AI[cur]=j;lv=j.levels;draw()}catch(x){e&&(e.textContent=x.code=="nokey"?"Add your API key in ⚙ AI API first.":x.status==401||x.status==403?"The provider rejected the key. Open ⚙ AI API to check it.":"AI request failed. Open ⚙ AI API and use Test connection.")}
+ $("scan").classList.remove("on2");pane()}
+function sel(t){cur=t;dayui();lv=AI[t]?AI[t].levels:null;renderWL();head();draw();pane()}
+$("wl").onclick=e=>{const r=e.target.closest(".row");r&&sel(r.dataset.t)};
+$("tabs").onclick=e=>{if(e.target.dataset.t){tab=e.target.dataset.t;document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t==tab));pane()}};
+$("tf").innerHTML=[["1D",1],["1M",22],["3M",66],["6M",130],["1Y",260]].map(([n,d])=>`<button data-d="${d}" class="${d==90||d==66?"":""}">${n}</button>`).join("");rg=66;
+$("tf").onclick=e=>{const d=e.target.dataset.d;if(d){rg=+d;ID=d=="1"?(ID>=0?ID:D[cur].length-1):-1;dayui();[...$("tf").children].forEach(b=>b.classList.toggle("on",b.dataset.d==d));head();draw()}};$("tf").children[2].classList.add("on");
+$("th").onclick=()=>{const r=document.documentElement,l=getComputedStyle(r).getPropertyValue("--bg").trim()=="#eef2fb";r.dataset.theme=l?"dark":"light";draw()};
+setInterval(()=>{S.forEach(([t])=>{const a=D[t],k=a[a.length-1],n=k.c*(1+(Math.random()-.5)*.0016);k.c=n;k.h=Math.max(k.h,n);k.l=Math.min(k.l,n)});renderWL();head();draw();dash()},2500);
+const SNIP=["// Your own backend (keeps the API key secret)","import Anthropic from '@anthropic-ai/sdk';","const c = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });","","app.post('/api/analyze', async (req, res) => {","  const m = await c.messages.create({","    model: 'claude-sonnet-5-5', max_tokens: 1000,","    messages: [{ role: 'user', content: req.body.prompt }]","  });","  res.json({ text: m.content[0].text });","});"].join("\n");
+async function cfg(){$("mod").classList.add("on");document.querySelector(".mbox .ttl").firstChild.textContent="AI integration";const c=gc()||{p:"anthropic"},on=!!(c.key||c.p=="custom");
+ $("mb").innerHTML=`<div class="blk"><h4 class="${on?"up":"dn"}">● ${on?"Saved: "+esc(PROV[c.p].n)+" (press Test connection)":"No AI provider yet"}</h4><div class="mu">Use any provider. Your key stays in this browser and is sent only to that provider.</div></div>
+ <label class="mu">Provider<select id="pv" class="fi">${Object.entries(PROV).map(([k,v])=>`<option value="${k}" ${k==c.p?"selected":""}>${v.n}</option>`).join("")}</select></label>
+ <label class="mu">API key<input id="ky" class="fi" type="password" placeholder="paste key (not needed for local Ollama)" value="${esc(c.key||"")}"></label>
+ <label class="mu">Model name<input id="md" class="fi" value="${esc(c.model||"")}"></label>
+ <label class="mu" id="ul">Base URL<input id="bu" class="fi" value="${esc(c.url||"")}"></label>
+ <div class="seg"><button class="btn" id="sv">Save</button><button class="btn" id="ts">Test connection</button><button class="btn" id="cl">Remove key</button></div><div class="mu" id="tr"></div>
+ <div class="mu">Anyone using this browser can read the key, so use a restricted key. For a public site, keep keys on your own server (example below).</div><pre>${SNIP}</pre>`;
+ const sync=()=>{const p=$("pv").value,P=PROV[p];$("md").placeholder=P.m||"model name";$("bu").placeholder=P.u||"";$("ul").style.display=p=="custom"?"":"none"},rd=()=>{const v={p:$("pv").value,key:$("ky").value.trim(),model:$("md").value.trim(),url:$("bu").value.trim()};if(v.p!="custom")v.url="";return v};
+ $("pv").onchange=sync;sync();
+ $("sv").onclick=()=>{localStorage.setItem("aicfg",JSON.stringify(rd()));pill();cfg()};
+ $("ts").onclick=async()=>{localStorage.setItem("aicfg",JSON.stringify(rd()));pill();$("tr").textContent="Testing…";try{const j=await ai('Reply ONLY with JSON {"ok":true}');$("tr").textContent=j&&j.ok?"✓ Connected and working":"Got a reply, but not in the expected format"}catch(e){$("tr").textContent=e&&e.code=="http"?"✗ Provider rejected the request (HTTP "+e.status+"). "+(e.msg?"Provider says: "+e.msg.slice(0,240):"Check key, model name and billing."):"✗ Could not connect. Check key, model name, and that the provider allows browser requests."}};
+ $("cl").onclick=()=>{localStorage.removeItem("aicfg");pill();cfg()}}
+const SEC={RELIANCE:"Energy",TCS:"IT",INFY:"IT",HDFCBANK:"Banking",ICICIBANK:"Banking",SBIN:"Banking",TATAMOTORS:"Auto",ITC:"FMCG",ZOMATO:"Consumer Tech",BHARTIARTL:"Telecom"};
+let NW=null,NF="all";const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const PROV={anthropic:{n:"Anthropic (Claude)",m:"claude-sonnet-5-5"},openai:{n:"OpenAI (ChatGPT)",m:"gpt-4o-mini",u:"https://api.openai.com/v1"},gemini:{n:"Google Gemini",m:"gemini-2.0-flash"},groq:{n:"Groq",m:"llama-3.3-70b-versatile",u:"https://api.groq.com/openai/v1"},openrouter:{n:"OpenRouter (any model)",m:"openai/gpt-4o-mini",u:"https://openrouter.ai/api/v1"},deepseek:{n:"DeepSeek",m:"deepseek-chat",u:"https://api.deepseek.com/v1"},mistral:{n:"Mistral",m:"mistral-small-latest",u:"https://api.mistral.ai/v1"},custom:{n:"Custom (OpenAI-compatible / Ollama)",m:"",u:"http://localhost:11434/v1"}};
+const em=async r=>{try{const j=await r.json(),e=j.error||j;return String(e.message||e)}catch(x){return""}};
+const gc=()=>{try{return JSON.parse(localStorage.getItem("aicfg")||"null")}catch(e){return null}};
+async function ai(q){const c=gc();if(!c||(!c.key&&c.p!="custom"))throw{code:"nokey"};const P=PROV[c.p]||PROV.anthropic,m=c.model||P.m;let r,t;
+ if(c.p=="anthropic"){r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":c.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:m,max_tokens:4000,messages:[{role:"user",content:q}]})});if(!r.ok)throw{code:"http",status:r.status,msg:await em(r)};t=(await r.json()).content[0].text}
+ else if(c.p=="gemini"){r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":generateContent?key="+encodeURIComponent(c.key),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:q}]}]})});if(!r.ok)throw{code:"http",status:r.status,msg:await em(r)};t=(await r.json()).candidates[0].content.parts[0].text}
+ else{const u=(c.url||P.u).replace(/\/+$/,""),h={"content-type":"application/json"};if(c.key)h.authorization="Bearer "+c.key;r=await fetch(u+"/chat/completions",{method:"POST",headers:h,body:JSON.stringify({model:m,messages:[{role:"user",content:q}],max_tokens:4000})});if(!r.ok)throw{code:"http",status:r.status,msg:await em(r)};t=(await r.json()).choices[0].message.content}
+ const k=t.match(/\{[\s\S]*\}/);return JSON.parse(k?k[0]:t)}
+function cover(t){let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))%360;const r=rng(h+7);let p="";for(let i=0;i<24;i++)p+=(i*10)+","+(75-Math.sin(i/3+h)*16-i*1.3*(r()+.4)).toFixed(0)+" ";
+ return`<svg viewBox="0 0 240 110" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g${t}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h},80%,45%)"/><stop offset="1" stop-color="hsl(${(h+70)%360},80%,22%)"/></linearGradient></defs><rect width="240" height="110" fill="url(#g${t})"/><polyline points="${p}" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><text x="14" y="98" fill="#fff" font-size="26" font-weight="800" font-family="system-ui">${t}</text></svg>`}
+function dash(){const q=S.map(([t])=>({t,q:pct(D[t])[2],r:rsi(D[t])})),av=q.reduce((a,x)=>a+x.q,0)/q.length,ar=q.reduce((a,x)=>a+x.r,0)/q.length,sc=Math.max(0,Math.min(100,Math.round(50+av*12+(ar-50)*.9))),lb=sc>75?"Extreme Greed":sc>55?"Greed":sc>45?"Neutral":sc>25?"Fear":"Extreme Fear",an=Math.PI*(1-sc/100),nx=100+66*Math.cos(an),ny=100-66*Math.sin(an);
+ $("fg").innerHTML=`<svg viewBox="0 0 200 112"><defs><linearGradient id="fgg"><stop offset="0" stop-color="#ff4d6a"/><stop offset=".5" stop-color="#f5b942"/><stop offset="1" stop-color="#19d38a"/></linearGradient></defs><path d="M20 100A80 80 0 0 1 180 100" fill="none" stroke="url(#fgg)" stroke-width="14" stroke-linecap="round"/><line x1="100" y1="100" x2="${nx}" y2="${ny}" stroke="var(--tx)" stroke-width="3" stroke-linecap="round"/><circle cx="100" cy="100" r="6" fill="var(--tx)"/></svg><div class="fgn">${sc}</div><div class="mu">${lb} (demo index from simulated data)</div>`;
+ $("hm").innerHTML=q.map(x=>{const c=x.q>=0?"25,211,138":"255,77,106",a=Math.min(.85,.15+Math.abs(x.q)*.18);return`<div class="tile" data-t="${x.t}" style="background:rgba(${c},${a})"><b>${x.t}</b><small>${SEC[x.t]}</small><span>${x.q>=0?"+":""}${x.q.toFixed(2)}%</span></div>`}).join("");
+ const o=[...q].sort((a,b)=>b.q-a.q);$("mv").innerHTML=[...o.slice(0,3),...o.slice(-3).reverse()].map(x=>`<div class="mvr"><span>${x.t}</span><span class="${x.q>=0?"up":"dn"}">${x.q>=0?"▲":"▼"} ${Math.abs(x.q).toFixed(2)}%</span></div>`).join("")}
+function newsCards(){const el=$("ng");if(!NW){el.innerHTML="";return}el.innerHTML=NW.filter(n=>NF=="all"||n.sentiment==NF).map(n=>{const sn=["positive","negative"].includes(n.sentiment)?n.sentiment:"neutral",t=esc(n.ticker);return`<article class="nc" data-t="${t}"><div class="im">${cover(t)}<span class="tag">${sn}</span></div><div class="nb"><small class="mu">${t} · ${esc(SEC[n.ticker]||"")} · 1 min read</small><h3>${esc(n.headline)}</h3><p class="mu">${esc(n.summary)}</p><span class="rd">Read full article →</span></div></article>`}).join("")}
+async function genNews(){const b=$("gn");b.disabled=true;b.textContent="Writing today’s briefing…";$("ng").innerHTML='<div class="nc sk"></div><div class="nc sk"></div><div class="nc sk"></div><div class="nc sk"></div>';
+ try{const j=await ai(`You are a market news editor for Indian equities. Write a daily briefing for these NSE companies: ${S.map(s=>s[0]+" ("+s[1]+")").join(", ")}. For EACH company write one item about its typical business and sector drivers right now. Keep it general: never invent specific figures, quotes or events. Reply ONLY with JSON: {"mood":"one sentence market mood","items":[{"ticker":"NSE symbol","headline":"","summary":"one sentence","sentiment":"positive|negative|neutral","article":"two short paragraphs separated by a newline, about 70 words total"}]}`);NW=j.items;$("mood").textContent=j.mood}
+ catch(e){$("ng").innerHTML='<div class="mu" style="padding:12px">'+(e&&e.code=="nokey"?"Add your API key in ⚙ AI API first.":"AI is unavailable right now. Try again shortly.")+"</div>"}
+ b.disabled=false;b.textContent="↻ Refresh briefing";if(NW)newsCards()}
+function art(t){const n=NW&&NW.find(x=>x.ticker==t);if(!n)return;$("mod").classList.add("on");document.querySelector(".mbox .ttl").firstChild.textContent=t+" · Article";
+ $("mb").innerHTML=`<div class="im big">${cover(esc(t))}</div><h3 style="margin:0">${esc(n.headline)}</h3>${esc(n.article).split(/\n+/).map(p=>`<p style="margin:0">${p}</p>`).join("")}<button class="btn" id="aa">Analyze ${esc(t)} chart with AI</button><div class="mu">AI-written general briefing, not a live news wire. Verify on NSE/BSE.</div>`;
+ $("aa").onclick=()=>{$("mod").classList.remove("on");sel(t);scrollTo({top:0,behavior:"smooth"})}}
+$("gn").onclick=genNews;$("ng").onclick=e=>{const c=e.target.closest(".nc");c&&c.dataset.t&&art(c.dataset.t)};
+$("nf").onclick=e=>{const f=e.target.dataset.f;if(f){NF=f;[...$("nf").children].forEach(b=>b.classList.toggle("on",b.dataset.f==f));newsCards()}};
+$("hm").onclick=e=>{const t=e.target.closest(".tile");t&&sel(t.dataset.t)};
+try{const d=new Date().toDateString(),o=JSON.parse(localStorage.getItem("st")||"{}");let n=o.n||1;if(o.d!=d){n=o.d==new Date(Date.now()-864e5).toDateString()?n+1:1;localStorage.setItem("st",JSON.stringify({d,n}))}$("sk").textContent="🔥 "+n+"-day streak"}catch(e){}
+dash();
+function bd(n){const d=new Date(2026,10,13);while(n>0){d.setDate(d.getDate()-1);if(d.getDay()%6)n--}return d}
+const dl=i=>bd(D[cur].length-1-i).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+function intra(t,i){const k=D[t][i],r=rng(i*131+t.charCodeAt(0)*7+t.length),n=75,p=[];for(let j=0;j<=n;j++){const v=k.o+(k.c-k.o)*j/n+(r()-.5)*(k.h-k.l)*.5*Math.sin(Math.PI*j/n);p.push(Math.min(k.h,Math.max(k.l,v)))}
+ p[1+Math.floor(r()*(n-2))]=k.h;p[1+Math.floor(r()*(n-2))]=k.l;p[0]=k.o;p[n]=k.c;const w=(k.h-k.l)*.04,o=[];for(let j=1;j<=n;j++){const a=p[j-1],c=p[j];o.push({o:a,c,h:Math.min(k.h,Math.max(a,c)+r()*w),l:Math.max(k.l,Math.min(a,c)-r()*w),v:Math.round(1e5*(1+r()*4))})}return o}
+function dayui(){const el=$("dn");el.style.display=ID>=0?"flex":"none";if(ID<0)return;const k=D[cur][ID],n=D[cur].length;
+ el.innerHTML=`<button class="btn" data-a="-1">◀</button><select id="dsel">${D[cur].map((_,i)=>n-1-i).map(i=>`<option value="${i}" ${i==ID?"selected":""}>${dl(i)}</option>`).join("")}</select><button class="btn" data-a="1">▶</button><button class="btn" data-a="0">Latest</button><span class="mu">O ${fmt(k.o)} · H ${fmt(k.h)} · L ${fmt(k.l)} · C ${fmt(k.c)}</span>`}
+$("dn").onclick=e=>{const a=e.target.dataset.a;if(a==null)return;const n=D[cur].length;ID=a=="0"?n-1:Math.max(0,Math.min(n-1,ID+ +a));dayui();head();draw()};
+$("dn").onchange=e=>{if(e.target.id=="dsel"){ID=+e.target.value;dayui();head();draw()}};
+$("cfg").onclick=cfg;$("mx").onclick=()=>$("mod").classList.remove("on");$("mod").onclick=e=>{if(e.target.id=="mod")$("mod").classList.remove("on")};
+function pill(){const c=gc(),on=!!(c&&(c.key||c.p=="custom")),p=$("pl");p.textContent="AI: "+(on?PROV[c.p].n.split(" (")[0]:"off");p.style.color=on?"var(--up)":"var(--mu)"}pill();addEventListener("resize",draw);sel("RELIANCE");
+</script></body></html>
